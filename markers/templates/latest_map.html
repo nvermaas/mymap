@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block myBlock %}
+    <h4>{{  timestamp }} from {{ address }}</h4>
+    {{ markers|json_script:"markers-data" }}
+    <div id="map"></div>
+    <script src="{% static 'map.js' %}"></script>
+  </body>
+{% endblock %}
