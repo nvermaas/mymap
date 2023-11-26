@@ -128,4 +128,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # make a symbolic link to /var/logs/auth.log?
-AUTH_LOG_FILE = '/shared/auth.log'
+#AUTH_LOG_FILE = '/var/logs/auth.log'
+AUTH_LOG_FILE = os.path.join(BASE_DIR, os.path.join('data','auth.log'))
