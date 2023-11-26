@@ -1,3 +1,4 @@
 from django.contrib import admin
+from .models import Sniffer
 
-# Register your models here.
+admin.site.register(Sniffer)

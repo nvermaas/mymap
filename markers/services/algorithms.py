@@ -1,6 +1,7 @@
 from django.conf import settings
 import geocoder
 from datetime import datetime, timedelta
+from ..models import Sniffer
 
 AUTH_DATE_FORMAT = '%b %d %H:%M:%S'
 
@@ -93,13 +94,32 @@ def geocode(ip):
     """
     Get location information based on IP address
     """
-    g = geocoder.ip(ip)
-
     result = {}
-    result['latitude'] = g.latlng[1]
-    result['longtitude'] = g.latlng[0]
-    result['address'] = g.address
-    result['country'] = g.country
+
+    # first check in the sniffers database to prevent too many requests to geocoder (only 1000 a day are allowed)
+    try:
+        sniffer = Sniffer.objects.get(ip=ip)
+        result['latitude'] = sniffer.latitude
+        result['longtitude'] = sniffer.longtitude
+        result['address'] = sniffer.address
+        result['country'] = sniffer.country
+
+    except Sniffer.DoesNotExist:
+        g = geocoder.ip(ip)
+
+        result['latitude'] = g.latlng[1]
+        result['longtitude'] = g.latlng[0]
+        result['address'] = g.address
+        result['country'] = g.country
+
+        # store in the database
+        new_sniffer = Sniffer(
+            ip=ip,
+            latitude=result['latitude'],
+            longtitude = result['longtitude'],
+            address=g.address,
+            country=g.country)
+        new_sniffer.save()
 
     return result
 
