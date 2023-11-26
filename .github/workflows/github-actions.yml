@@ -1,0 +1,23 @@
+name: build-deploy-sniffers
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy-hiking:
+    runs-on: ubuntu-latest
+    steps:
+      - name: execute build & deploy procedure on mintbox
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.MY_HOST }}
+          username: ${{ secrets.MY_USERNAME }}
+          password: ${{ secrets.MY_PASSWORD }}
+          #key: ${{ secrets.MY_PRIVATE_KEY }}
+          script: |
+             cd ~/my_docker/sniffers
+             git pull
+             docker build -t sniffers:latest .
+             cd $HOME/shared
+             docker-compose -p dockernest up -d
