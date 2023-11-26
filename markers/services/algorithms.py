@@ -110,29 +110,32 @@ def create_features(ips):
     id = 0
 
     for ip in ips:
-        id=+1
+        try:
+            id=+1
 
-        feature = {}
-        feature['id'] = id
-        feature['type'] = 'Feature'
+            feature = {}
+            feature['id'] = id
+            feature['type'] = 'Feature'
 
-        properties = {}
-        properties['name'] = ip
-        properties['pk'] = id
-        feature['properties'] = properties
+            properties = {}
+            properties['name'] = ip
+            properties['pk'] = id
+            feature['properties'] = properties
 
-        # calculate the coordinates
-        location = geocode(ip)
-        coordinates = []
-        coordinates.append(location['latitude'])
-        coordinates.append(location['longtitude'])
+            # calculate the coordinates
+            location = geocode(ip)
+            coordinates = []
+            coordinates.append(location['latitude'])
+            coordinates.append(location['longtitude'])
 
-        geometry = {}
-        geometry['type'] = "Point"
-        geometry['coordinates'] = coordinates
+            geometry = {}
+            geometry['type'] = "Point"
+            geometry['coordinates'] = coordinates
 
-        feature['geometry'] = geometry
+            feature['geometry'] = geometry
 
-        features.append(feature)
+            features.append(feature)
+        except:
+            pass
 
     return features

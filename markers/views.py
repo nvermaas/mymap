@@ -122,6 +122,8 @@ class LatestSeriesHackerView(TemplateView):
 
         # convert them to leaflet features
         features = algorithms.create_features(ips)
+        if not features:
+            features = []
 
         context["markers"] = {
           "type": "FeatureCollection",
