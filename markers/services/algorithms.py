@@ -1,6 +1,8 @@
 from django.conf import settings
 import geocoder
+from datetime import datetime, timedelta
 
+AUTH_DATE_FORMAT = '%b %d %H:%M:%S'
 
 def get_latest_ip():
     """
@@ -37,6 +39,56 @@ def get_latest_ip():
 
     return None
 
+
+def get_latest_ips(seconds):
+    """
+    Find the latest IP's in auth.log file
+    """
+    ips = []
+    timestamp_start = None
+
+    # open auth.log
+    auth_log_file = settings.AUTH_LOG_FILE
+
+    # read the log file in memory in reversed order
+    with open(auth_log_file) as f:
+        lines = reversed(f.readlines())
+
+    # read through the lines in reversed order
+    for line in lines:
+        # check for a IP... this can be recognized by the keyword 'port' following it
+        # Nov 26 13:55:02 nico-mint sshd[18759]: Failed password for root from 106.54.212.205 port 35102 ssh2
+
+        if ' port' in line:
+            try:
+                a = line.split(' port ')
+                b = a[0].split(' from ')
+                c = b[0].split(' nico-mint ')
+
+                t = c[0]
+
+                # convert timestamp to timestamp
+                timestamp = datetime.strptime(t, AUTH_DATE_FORMAT)
+                if not timestamp_start:
+                    timestamp_start = timestamp - timedelta(seconds=seconds)
+
+                # if b[1] still contains spaces, then it is not the expected format. Ignore this line
+                if ' ' in b[1]:
+                    continue
+
+                ip = b[1]
+                ips.append(ip)
+
+                # read back in the file for the number of indicated seconds
+                if timestamp < timestamp_start:
+                    break
+
+            except:
+                pass
+
+    # return a unique list of IP's
+    return list(set(ips))
+
 def geocode(ip):
     """
     Get location information based on IP address
@@ -50,3 +102,37 @@ def geocode(ip):
     result['country'] = g.country
 
     return result
+
+
+def create_features(ips):
+
+    features = []
+    id = 0
+
+    for ip in ips:
+        id=+1
+
+        feature = {}
+        feature['id'] = id
+        feature['type'] = 'Feature'
+
+        properties = {}
+        properties['name'] = ip
+        properties['pk'] = id
+        feature['properties'] = properties
+
+        # calculate the coordinates
+        location = geocode(ip)
+        coordinates = []
+        coordinates.append(location['latitude'])
+        coordinates.append(location['longtitude'])
+
+        geometry = {}
+        geometry['type'] = "Point"
+        geometry['coordinates'] = coordinates
+
+        feature['geometry'] = geometry
+
+        features.append(feature)
+
+    return features

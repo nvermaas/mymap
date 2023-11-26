@@ -7,4 +7,5 @@ app_name = "markers"
 urlpatterns = [
     path("map/<ip>", views.MarkersMapView.as_view()),
     path("latest", views.LatestHackerView.as_view()),
+    path("latest_series", views.LatestSeriesHackerView.as_view()),
 ]

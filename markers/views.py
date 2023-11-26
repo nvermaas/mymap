@@ -105,3 +105,32 @@ class LatestHackerView(TemplateView):
           ]
         }
         return context
+
+class LatestSeriesHackerView(TemplateView):
+    template_name = "latest_series_map.html"
+
+    def get_context_data(self, **kwargs):
+
+        context = (
+            super().get_context_data(
+                **kwargs
+            )
+        )
+
+        # geolocate the ips
+        ips = algorithms.get_latest_ips(10)
+
+        # convert them to leaflet features
+        features = algorithms.create_features(ips)
+
+        context["markers"] = {
+          "type": "FeatureCollection",
+          "crs": {
+            "type": "name",
+            "properties": {
+              "name": "EPSG:4326"
+            }
+          },
+          "features": features
+        }
+        return context
