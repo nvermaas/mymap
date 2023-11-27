@@ -22,7 +22,7 @@ let feature = L.geoJSON(markers)
     return layer.feature.properties.name;
   }).addTo(map);
 
-if (feature.properties.color == 'red') {
+
     L.geoJSON(markers, {
         pointToLayer: function (feature, latlng) {
             return new L.circleMarker(latlng, {
@@ -34,7 +34,7 @@ if (feature.properties.color == 'red') {
             });
         },
     }).addTo(map);
-}
+
 
 
 map.fitBounds(feature.getBounds(), {
