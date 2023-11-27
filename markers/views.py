@@ -1,4 +1,4 @@
-import geocoder
+
 from markers.services import algorithms
 
 from django.views.generic.base import (

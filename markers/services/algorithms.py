@@ -45,6 +45,8 @@ def get_latest_ips(seconds):
     """
     Find the latest IP's in auth.log file
     """
+    print(get_latest_ips)
+
     ips = []
     timestamp_start = None
 
@@ -88,12 +90,14 @@ def get_latest_ips(seconds):
                 pass
 
     # return a unique list of IP's
+    print(ips)
     return list(set(ips))
 
 def geocode(ip):
     """
     Get location information based on IP address
     """
+    print("geocode: "+ip)
     result = {}
 
     # first check in the sniffers database to prevent too many requests to geocoder (only 1000 a day are allowed)
@@ -103,6 +107,8 @@ def geocode(ip):
         result['longtitude'] = sniffer.longtitude
         result['address'] = sniffer.address
         result['country'] = sniffer.country
+        result['new'] = False
+        print("found: "+str(result))
 
     except Sniffer.DoesNotExist:
         g = geocoder.ip(ip)
@@ -111,6 +117,7 @@ def geocode(ip):
         result['longtitude'] = g.latlng[0]
         result['address'] = g.address
         result['country'] = g.country
+        result['new'] = True
 
         # store in the database
         new_sniffer = Sniffer(
@@ -120,7 +127,9 @@ def geocode(ip):
             address=g.address,
             country=g.country)
         new_sniffer.save()
+        print("created: " + str(result))
 
+    print(get_latest_ips)
     return result
 
 
@@ -133,6 +142,12 @@ def create_features(ips):
         try:
             id=+1
 
+            # calculate the coordinates
+            location = geocode(ip)
+            coordinates = []
+            coordinates.append(location['latitude'])
+            coordinates.append(location['longtitude'])
+
             feature = {}
             feature['id'] = id
             feature['type'] = 'Feature'
@@ -140,13 +155,15 @@ def create_features(ips):
             properties = {}
             properties['name'] = ip
             properties['pk'] = id
+
+            if location['new'] == True:
+                properties['color'] = 'red'
+            else:
+                properties['color'] = 'blue'
+
             feature['properties'] = properties
 
-            # calculate the coordinates
-            location = geocode(ip)
-            coordinates = []
-            coordinates.append(location['latitude'])
-            coordinates.append(location['longtitude'])
+
 
             geometry = {}
             geometry['type'] = "Point"

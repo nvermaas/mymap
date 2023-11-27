@@ -16,12 +16,26 @@ const markers = JSON.parse(
     "markers-data"
   ).textContent
 );
+
 let feature = L.geoJSON(markers)
   .bindPopup(function (layer) {
-    return layer
-      .feature.properties.name;
-  })
-  .addTo(map);
+    return layer.feature.properties.name;
+  }).addTo(map);
+
+L.geoJSON(markers,{
+ pointToLayer: function (feature, latlng) {
+  return new L.circleMarker(latlng, {
+    radius: 8,
+    fillColor: feature.properties.color,
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.8
+  });
+  },
+  }).addTo(map);
+
+
+
 map.fitBounds(feature.getBounds(), {
   padding: [100, 100],
 });
