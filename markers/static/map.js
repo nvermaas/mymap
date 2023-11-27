@@ -22,18 +22,19 @@ let feature = L.geoJSON(markers)
     return layer.feature.properties.name;
   }).addTo(map);
 
-L.geoJSON(markers,{
- pointToLayer: function (feature, latlng) {
-  return new L.circleMarker(latlng, {
-    radius: 8,
-    fillColor: feature.properties.color,
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8
-  });
-  },
-  }).addTo(map);
-
+if (feature.properties.color == 'red') {
+    L.geoJSON(markers, {
+        pointToLayer: function (feature, latlng) {
+            return new L.circleMarker(latlng, {
+                radius: 8,
+                fillColor: feature.properties.color,
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.8
+            });
+        },
+    }).addTo(map);
+}
 
 
 map.fitBounds(feature.getBounds(), {

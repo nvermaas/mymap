@@ -118,7 +118,7 @@ class LatestSeriesHackerView(TemplateView):
         )
 
         # geolocate the ips
-        ips = algorithms.get_latest_ips(10)
+        ips = algorithms.get_latest_ips(60)
 
         # convert them to leaflet features
         features = algorithms.create_features(ips)

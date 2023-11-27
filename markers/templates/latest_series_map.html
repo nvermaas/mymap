@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block myBlock %}
-    <h4>Latest sniffers...</h4>
+    <h4>Sniffers in the last minute...</h4>
     {{ markers|json_script:"markers-data" }}
     <div id="map"></div>
     <script src="{% static 'map.js' %}"></script>

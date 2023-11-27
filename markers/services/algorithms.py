@@ -159,7 +159,7 @@ def create_features(ips):
             if location['new'] == True:
                 properties['color'] = 'red'
             else:
-                properties['color'] = 'blue'
+                properties['color'] = 'green'
 
             feature['properties'] = properties
 
