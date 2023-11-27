@@ -158,8 +158,10 @@ def create_features(ips):
 
             if location['new'] == True:
                 properties['color'] = 'red'
+                properties['radius'] = 8
             else:
                 properties['color'] = 'green'
+                properties['radius'] = 4
 
             feature['properties'] = properties
 

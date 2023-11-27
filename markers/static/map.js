@@ -23,17 +23,17 @@ let feature = L.geoJSON(markers)
   }).addTo(map);
 
 
-    L.geoJSON(markers, {
-        pointToLayer: function (feature, latlng) {
-            return new L.circleMarker(latlng, {
-                radius: 8,
-                fillColor: feature.properties.color,
-                weight: 1,
-                opacity: 1,
-                fillOpacity: 0.8
-            });
-        },
-    }).addTo(map);
+L.geoJSON(markers, {
+    pointToLayer: function (feature, latlng) {
+        return new L.circleMarker(latlng, {
+            radius: feature.properties.radius,
+            fillColor: feature.properties.color,
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+        });
+    },
+}).addTo(map);
 
 
 
