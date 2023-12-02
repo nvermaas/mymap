@@ -15,9 +15,12 @@ jobs:
           username: ${{ secrets.MY_USERNAME }}
           password: ${{ secrets.MY_PASSWORD }}
           #key: ${{ secrets.MY_PRIVATE_KEY }}
+          #source: "docker/docker-compose.yml"
+          #target: "~/my_docker/sniffers"
+
           script: |
              cd ~/my_docker/sniffers
              git pull
              docker build -t sniffers:latest .
-             cd $HOME/shared
-             docker-compose -p dockernest up -d
+             cd docker
+             docker-compose -p sniffers up -d
