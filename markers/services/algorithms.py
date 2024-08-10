@@ -5,6 +5,37 @@ from ..models import Sniffer
 
 AUTH_DATE_FORMAT = '%b %d %H:%M:%S'
 
+
+def get_ip_from_line(line):
+    # check for a IP... this can be recognized by the keyword 'port' following it
+    # from 159.203.72.79 port 41636
+
+    if ' port' in line and ' from' in line:
+        try:
+            a = line.split(' port ')
+            b = a[0].split(' from ')
+            c = b[0].split(' middle-earth ')
+
+            # ignore my own activity on my network
+            if "192.168.178" in line:
+                return None, None
+
+            timestamp = c[0]
+
+            # if b[1] still contains spaces, then it is not the expected format. Ignore this line
+            if ' ' in b[1]:
+                return None, None
+
+            ip = b[1]
+
+            return timestamp, ip
+
+        except Exception as error:
+            # ignore this line
+            print(error)
+
+    return None,None
+
 def get_latest_ip():
     """
     Find the latest IP entry in the auth.log file
@@ -19,24 +50,10 @@ def get_latest_ip():
 
     # read through the lines in reversed order
     for line in lines:
-        # check for a IP... this can be recognized by the keyword 'port' following it
-        # from 159.203.72.79 port 41636
-        if ' port' in line:
-            try:
-                a = line.split(' port ')
-                b = a[0].split(' from ')
-                c = b[0].split(' nico-mint ')
 
-                timestamp = c[0]
-
-                # if b[1] still contains spaces, then it is not the expected format. Ignore this line
-                if ' ' in b[1]:
-                    continue
-
-                ip = b[1]
-                return timestamp, ip
-            except:
-                pass
+        timestamp, ip = get_ip_from_line(line)
+        if ip:
+            return timestamp, ip
 
     return None
 
@@ -62,32 +79,18 @@ def get_latest_ips(seconds):
         # check for a IP... this can be recognized by the keyword 'port' following it
         # Nov 26 13:55:02 nico-mint sshd[18759]: Failed password for root from 106.54.212.205 port 35102 ssh2
 
-        if ' port' in line:
-            try:
-                a = line.split(' port ')
-                b = a[0].split(' from ')
-                c = b[0].split(' nico-mint ')
+        t, ip = get_ip_from_line(line)
+        if ip:
+            ips.append(ip)
 
-                t = c[0]
+            # convert timestamp to timestamp
+            timestamp = datetime.strptime(t, AUTH_DATE_FORMAT)
+            if not timestamp_start:
+                timestamp_start = timestamp - timedelta(seconds=seconds)
 
-                # convert timestamp to timestamp
-                timestamp = datetime.strptime(t, AUTH_DATE_FORMAT)
-                if not timestamp_start:
-                    timestamp_start = timestamp - timedelta(seconds=seconds)
-
-                # if b[1] still contains spaces, then it is not the expected format. Ignore this line
-                if ' ' in b[1]:
-                    continue
-
-                ip = b[1]
-                ips.append(ip)
-
-                # read back in the file for the number of indicated seconds
-                if timestamp < timestamp_start:
-                    break
-
-            except:
-                pass
+            # read back in the file for the number of indicated seconds
+            if timestamp < timestamp_start:
+                break
 
     # return a unique list of IP's
     print(ips)
@@ -111,23 +114,26 @@ def geocode(ip):
         print("found: "+str(result))
 
     except Sniffer.DoesNotExist:
-        g = geocoder.ip(ip)
+        try:
+            g = geocoder.ip(ip)
 
-        result['latitude'] = g.latlng[1]
-        result['longtitude'] = g.latlng[0]
-        result['address'] = g.address
-        result['country'] = g.country
-        result['new'] = True
+            result['latitude'] = g.latlng[1]
+            result['longtitude'] = g.latlng[0]
+            result['address'] = g.address
+            result['country'] = g.country
+            result['new'] = True
 
-        # store in the database
-        new_sniffer = Sniffer(
-            ip=ip,
-            latitude=result['latitude'],
-            longtitude = result['longtitude'],
-            address=g.address,
-            country=g.country)
-        new_sniffer.save()
-        print("created: " + str(result))
+            # store in the database
+            new_sniffer = Sniffer(
+                ip=ip,
+                latitude=result['latitude'],
+                longtitude = result['longtitude'],
+                address=g.address,
+                country=g.country)
+            new_sniffer.save()
+            print("created: " + str(result))
+        except:
+            print(f'{ip} could not be geocoded')
 
     print(get_latest_ips)
     return result
